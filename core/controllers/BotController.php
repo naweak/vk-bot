@@ -13,6 +13,14 @@
 		protected $picRe = '/\!(пикча|pic)/iu';
 		protected $promilleRe = '/^(‰|%)\s/iu';
 		protected $bash = "/^\!(ba|z){0,1}sh\s/iu";
+		protected $stallmans = [
+			'photo-173460287_456239462',
+			'photo-173460287_456239467',
+			'photo-173460287_456239472',
+			'photo-173460287_456239475',
+			'photo-173460287_456239476',
+			'photo-173460287_456239477'
+		];
 
 		public function antiSpam ($text) {
 			$text = str_replace('.', '(dot)', $text);
@@ -181,9 +189,19 @@
 					}
 				}
 			}
-			elseif(preg_match('/м(о|а)леку(л|р)а/iu', $command)) {
+			elseif(preg_match('/м(о|а)леку(л|р)а/iu', $this->command)) {
 				$random = md5(rand(1, 100000));
 				$this->vkAPI->messagesSend($peer_id, "АЧИЛАВЕКМАЛЕКУЛА!!1111 [random: 0x{$random}]");
+			}
+			elseif(preg_match('/(gnu|гну|жму|жми|gpl|гпл|жопаель|жопаэль)/iu', $this->command)) {
+				$stallman = $this->stallmans[array_rand($this->stallmans)];
+				$this->vkAPI->messagesSend(
+					$this->peer_id,
+					'',
+					[
+						$stallman
+					]
+				);
 			}
 		}
 	}
