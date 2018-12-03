@@ -21,6 +21,7 @@
 			'photo-173460287_456239476',
 			'photo-173460287_456239477'
 		];
+		protected $botMention = '/^\[club(.*?)\|@(.*?)\]\,{0,}\s\,{0,}/iu';
 
 		public function antiSpam ($text) {
 			$text = str_replace('.', '(dot)', $text);
@@ -58,6 +59,7 @@
 				$access_token,
 				$this->userToken
 			);
+			$this->command = preg_replace($this->botMention, '', $this->command);
 			if($this->inBlacklist($this->from_id)) {
 				exit("{$this->from_id} IS BANNED");
 			}
