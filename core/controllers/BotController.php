@@ -21,7 +21,7 @@
 			'photo-173460287_456239476',
 			'photo-173460287_456239477'
 		];
-		protected $botMention = '/^\[club(.*?)\|@(.*?)\]\,{0,}\s\,{0,}/iu';
+		protected $botMention = '/^\[club(.*?)\|(.*?)\]\,{0,}\s\,{0,}/iu';
 
 		public function antiSpam ($text) {
 			$text = str_replace('.', '(dot)', $text);
