@@ -16,6 +16,11 @@
 				]);
 			}
 		}
+		public function findPhrase ($phrase) {
+			return \R::getAll("SELECT * FROM bot_names WHERE `text` = ?", [
+				$phrase
+			]);
+		}
 		public function get () {
 			return \R::getAll('SELECT * FROM `bot_names`');
 		}

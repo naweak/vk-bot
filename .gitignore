@@ -1,0 +1,5 @@
+.phpintel
+.idea
+.vscode
+vendor
+includes.php

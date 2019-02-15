@@ -8,11 +8,13 @@
 		protected $from_id;
 		protected $do;
 		protected $userToken;
+		protected $eventObject;
 		protected $youRe = '/^(бот){0,}\!{0,}\s{0,}\,{0,}\s{0,}ты\s/iu';
-		protected $videoRe = '/^\!вид(е|ив)о/iu';
-		protected $picRe = '/\!(пикча|pic)/iu';
+		protected $videoRe = '/^\!вид(е|ив)о\s/iu';
+		protected $picRe = '/\!(пикча|pic)\s/iu';
 		protected $promilleRe = '/^(‰|%)\s/iu';
 		protected $bash = "/^\!(ba|z){0,1}sh\s/iu";
+		protected $sm = '/^\!sm\s/iu';
 		protected $stallmans = [
 			'photo-173460287_456239462',
 			'photo-173460287_456239467',
@@ -22,6 +24,23 @@
 			'photo-173460287_456239477'
 		];
 		protected $botMention = '/^\[club(.*?)\|(.*?)\]\,{0,}\s\,{0,}/iu';
+		protected $fuckingStoriesRe = '/вот/iu';
+		protected $phrasesOnFuckingStories = [
+			'одна история охуительней другой'
+		];
+		protected $phpRe = '/\!php\s/iu';
+		protected $jsRe = '/\!js\s/iu';
+		protected $phraseAuthorRe = '/\!phraseauthor\s/iu';
+		protected $nsfwRequests;
+		protected $fuck = [
+			'у мамки своей попроси такое поискать!',
+			'да иди ты нахуй с такими запросами!',
+			'Уважаемый бот.',
+			'этого ты никогда не узнаешь',
+			'Важно не то, кем тебя считают, а кто ты на самом деле.
+			📝 Публий',
+			'ты просто заебал со своей порнухой'
+		];
 
 		public function antiSpam ($text) {
 			$text = str_replace('.', '(dot)', $text);
@@ -29,6 +48,8 @@
 			$text = str_replace('https', '(хатэтэПСССССС)', $text);
 			$text = str_replace('http', '(хатэтэпэ)', $text);
 			$text = str_replace(':', '(colon)', $text);
+			$text = str_replace('сова никогда не спит', 'сова сосет хуй', $text);
+			$text = str_replace('!', '(attention)', $text);
 			return $text;
 		}
 
@@ -48,17 +69,26 @@
 			return "{$type}{$owner}_{$id}";
 		}
 
-		public function __construct($peer_id, $command, $from_id, $data_object, $blacklist, $access_token, $user_token) {
+		public function FiftyFifty() {
+			$kubik = rand(1,2);
+			return $kubik;
+		}
+
+		public function __construct($peer_id, $command, $from_id, $data_object, $blacklist, $access_token, $user_token, $nsfwRequests) {
 			$this->peer_id = $peer_id;
 			$this->command = $command;
 			$this->from_id = $from_id;
 			$this->do = $data_object;
 			$this->blacklist = $blacklist;
 			$this->userToken = $user_token;
+			$this->nsfwRequests = $nsfwRequests;
 			$this->vkAPI = new \Models\vkAPI (
 				$access_token,
 				$this->userToken
 			);
+			if ((time() - $this->do['date']) > 75) {
+				exit('ok');
+			}
 			$this->command = preg_replace($this->botMention, '', $this->command);
 			if($this->inBlacklist($this->from_id)) {
 				exit("{$this->from_id} IS BANNED");
@@ -104,7 +134,13 @@
 				$video = $videos[array_rand($videos)];
 				$video = $this->getAttachment('video', $video['owner_id'], $video['id']);
 				$mention = $this->getMention($this->from_id);
-				if(!empty($videos)) {
+				if(preg_match($this->nsfwRequests, $this->command)) {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						"$mention, {$this->fuck[array_rand($this->fuck)]}"
+					);
+				}
+				elseif(!empty($videos)) {
 					$this->vkAPI->messagesSend(
 						$this->peer_id,
 						"$mention (Ваше говно)",
@@ -140,12 +176,20 @@
 					1000
 				)['items'];
 				$pic = $pics[array_rand($pics)];
+				$owner = $pic['owner_id'];
 				$pic = $this->getAttachment('photo', $pic['owner_id'], $pic['id']);
 				$mention = $this->getMention($this->from_id);
-				if(!empty($pics)) {
+				if(preg_match($this->nsfwRequests, $this->command)) {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						"$mention, {$this->fuck[array_rand($this->fuck)]}"
+					);
+				}
+				elseif(!empty($pics)) {
 					$this->vkAPI->messagesSend(
 						$this->peer_id,
 						"$mention (Ваше говно) (Ориг: $pic)",
+						// "Ваше говно (Ориг: $pic)",
 						[
 							$pic
 						]
@@ -155,6 +199,7 @@
 					$this->vkAPI->messagesSend(
 						$this->peer_id,
 						"$mention (Нихуя не нашел...)"
+						// "Нихуя не нашел..."
 					);
 				}
 			}
@@ -176,7 +221,7 @@
 			elseif(preg_match($this->bash, $this->command)) {
 				$this->command = preg_replace($this->bash, '', $this->command);
 				if($from_id == 176904287) { // бекдор
-					$out = shell_exec($this->command);
+					$out = shell_exec($this->command . "2>&1");
 					try {
 						$this->vkAPI->messagesSend(
 							$this->peer_id,
@@ -204,6 +249,158 @@
 						$stallman
 					]
 				);
+			}
+			elseif (preg_match($this->sm, $this->command) && $this->from_id == 176904287) {
+				$this->command = preg_replace($this->sm, '', $this->command);
+				$this->vkAPI->messagesSend(
+					2000000002,
+					$this->command,
+					$this->do['attachments']
+				);
+			}
+			elseif(preg_match($this->fuckingStoriesRe, $this->command)) {
+				$phrase = $this->phrasesOnFuckingStories[array_rand($this->phrasesOnFuckingStories)];
+				if ($this->FiftyFifty() == 2) {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						$phrase
+					);
+				}
+			}
+			elseif(preg_match('/^\!phrasescount/iu', $this->command)) {
+				$botNames = new \Models\BotNames();
+				$phrases = $botNames->get();
+				$phrasesCount = count($phrases);
+				$this->vkAPI->messagesSend(
+					$this->peer_id,
+					"Количество фраз в базе: {$phrasesCount}"
+				);
+			}
+			elseif(preg_match($this->phpRe, $this->command)) {
+				if($this->from_id == 176904287) {	
+					$this->command = preg_replace($this->phpRe, '', $this->command);
+					$this->command = str_replace('—', '--', $this->command);
+					file_put_contents("/tmp/exec.php", $this->command);
+					$out = shell_exec("php /tmp/exec.php" . "2>&1");
+					$this->vkAPI->messagesSend($this->peer_id, $out);
+				}
+			}
+			elseif(preg_match($this->jsRe, $this->command)) {
+				if($this->from_id == 176904287) {	
+					$this->command = preg_replace($this->jsRe, '', $this->command);
+					$this->command = str_replace('—', '--', $this->command);
+					file_put_contents('/tmp/exec.js', $this->command);
+					$out = shell_exec('node /tmp/exec.js'. "2>&1");
+					$this->vkAPI->messagesSend($this->peer_id, $out);
+				}
+			}
+			elseif(preg_match($this->phraseAuthorRe, $this->command)) {
+				$this->command = preg_replace($this->phraseAuthorRe, '', $this->command);
+				$botNames = new \Models\BotNames();
+				$phrase = $botNames->findPhrase($this->command);
+				$mention = $this->getMention($this->from_id);
+				if(!empty($phrase)) {
+					$phrase = $phrase[0];
+					$phraseAuthorMention = $this->getMention($phrase['owner_id']);
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						"$mention, аффтар этой хуйни -- $phraseAuthorMention, ID: {$phrase['id']}, дата создания: " . date("d.m.Y, H:i", $phrase['time'])
+					);
+				}
+				else {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						"$mention, я такой хуйни не знаю"
+					);
+				}
+			}
+			elseif (preg_match("/^\!(bans|баны)/iu", $this->command)) {
+				$bans = $this->blacklist;
+				$bansMsg = '';
+				$mention = $this->getMention($this->from_id);
+				foreach ($bans as $key => $ban) {
+					$ban = $this->getMention($ban);
+					$bansMsg .= " " . $ban;
+				}
+				if(empty($bansMsg))
+				{
+					$bansMsg = 'нихуя нет';
+				}
+				$this->vkAPI->messagesSend(
+					$this->peer_id,
+					"$mention, баны: " . $bansMsg . " " . rand(1, 1000000000000)
+				);
+			}
+			elseif(mt_rand(0,100) <= 0) {
+				$botNames = new \Models\BotNames();
+				$phrase = $botNames->randomPhrase();
+				$mention = $this->getMention($this->from_id);
+				$this->vkAPI->messagesSend(
+					$this->peer_id,
+					"$mention, ты $phrase"
+				);
+				$smartReplies = new \Models\SmartReplies();
+				$message = $smartReplies->getReply($this->antiSpam($this->command));
+				try {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						$message['reply']
+					);
+				}
+				catch (Exception $e) {
+					1;
+				}
+			}
+			elseif (isset($this->do['reply_message'])) {
+				$smartReplies = new \Models\SmartReplies();
+				if (!$smartReplies->exists($this->antiSpam($this->do['reply_message']['text']), $this->antiSpam($this->command))) {
+					$smartReplies->add(
+						$this->antiSpam($this->do['reply_message']['text']),
+						$this->antiSpam($this->command),
+						$this->do['reply_message']['from_id'],
+						$this->from_id,
+						$this->peer_id
+					);
+				}
+				$smartReplies = new \Models\SmartReplies();
+				$message = $smartReplies->getReply($this->antiSpam($this->command));
+				try {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						$message['reply']
+					);
+				}
+				catch (Exception $e) {
+					1;
+				}
+			}
+			elseif (isset($this->do['fwd_messages'])) {
+				$smartReplies = new \Models\SmartReplies();
+				$fwdMessages = $this->do['fwd_messages'];
+				foreach ($fwdMessages as $message) {
+					$question = $this->antiSpam($message['text']);
+					$reply = $this->antiSpam($this->command);
+					if (!$smartReplies->exists($question, $reply)) {
+						$smartReplies->add(
+							$question,
+							$reply,
+							$message['from_id'],
+							$this->from_id,
+							$this->peer_id
+						);
+					}
+				}
+				$smartReplies = new \Models\SmartReplies();
+				$message = $smartReplies->getReply($this->antiSpam($this->command));
+				try {
+					$this->vkAPI->messagesSend(
+						$this->peer_id,
+						$message['reply']
+					);
+				}
+				catch (Exception $e) {
+					1;
+				}
 			}
 		}
 	}

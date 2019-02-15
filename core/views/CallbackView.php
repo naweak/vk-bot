@@ -6,6 +6,7 @@
 		protected $blacklist;
 		protected $token;
 		protected $userToken;
+		protected $nsfwRequests;
 		public function newMessageHandle($eventObject) {
 			$peerId = $eventObject['peer_id'];
 			$command = $eventObject['text'];
@@ -21,16 +22,18 @@
 				$eventObject,
 				$blacklist,
 				$this->token,
-				$this->userToken
+				$this->userToken,
+				$this->nsfwRequests
 			);
 		}
 
-		public function __construct ($event, $confirm, $blacklist, $access_token, $user_token) {
+		public function __construct ($event, $confirm, $blacklist, $access_token, $user_token, $nsfwRequests) {
 			$this->event = $event;
 			$this->confirm = $confirm;
 			$this->blacklist = $blacklist;
 			$this->token = $access_token;
 			$this->userToken = $user_token;
+			$this->nsfwRequests = $nsfwRequests;
 			try {
 				switch ($event['type']) {
 					case 'confirmation':

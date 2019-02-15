@@ -21,6 +21,7 @@
 		$config['confirm'],
 		$config['blacklist'],
 		$config['access_token'],
-		$config['user_token']
+		$config['user_token'],
+		$config['nsfw_requests']
 	);
 ?>

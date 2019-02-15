@@ -28,7 +28,7 @@
 
 			$response = json_decode($json, true);
 			if (!$response || !isset($response['response'])) {
-				throw new \Exception("Invalid response for {$method} request");
+				exit('ok');
 			}
 
 			return $response['response'];
