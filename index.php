@@ -4,17 +4,15 @@
 	ini_set('display_errors', $config['display_errors']);
 	error_reporting(E_ALL);
 
-	if(!isset($_REQUEST)) {
-		exit;
-	}
+	if(!isset($_REQUEST)) exit;
 
-	if(!$config['on']) {
-		exit('ok');
-	}
+	if(!$config['on']) exit('ok');
 
 	$event = file_get_contents('php://input');
 
 	$event = json_decode($event, true);
+
+	if ($event['secret'] != $config['secret']) exit('ok');
 
 	$callback = new Views\Callback (
 		$event,
