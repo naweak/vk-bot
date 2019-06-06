@@ -131,6 +131,13 @@
 					1,
 					200
 				)['items'];
+				logMediaRequest(
+					$this->command, 
+					'video', 
+					$this->from_id, 
+					$this->peer_id, 
+					time()
+				);
 				$video = $videos[array_rand($videos)];
 				$video = $this->getAttachment('video', $video['owner_id'], $video['id']);
 				$mention = $this->getMention($this->from_id);
@@ -175,6 +182,13 @@
 					$this->command,
 					1000
 				)['items'];
+				logMediaRequest(
+					$this->command,
+					'pic',
+					$this->from_id,
+					$this->peer_id,
+					time()
+				);
 				$pic = $pics[array_rand($pics)];
 				$owner = $pic['owner_id'];
 				$pic = $this->getAttachment('photo', $pic['owner_id'], $pic['id']);

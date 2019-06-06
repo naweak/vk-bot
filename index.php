@@ -14,6 +14,18 @@
 
 	if ($event['secret'] != $config['secret']) exit('ok');
 
+	function logMediaRequest ($query, $type, $from, $peer, $time) {
+		file_put_contents(__DIR__ . '/log.txt', json_encode([
+			'media_request' => [
+				$query,
+				$type,
+				$from,
+				$peer,
+				$time
+			]
+		], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND);
+	}
+
 	$callback = new Views\Callback (
 		$event,
 		$config['confirm'],
